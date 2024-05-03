@@ -3,13 +3,7 @@ import cv2
 import math 
 
 cap = cv2.VideoCapture(0)
-cap.set(3, 640)
-cap.set(4, 480)
-
-# model
 model = YOLO("best.pt")
-
-# object classes
 classNames = ['Silo', 'ball_blue', 'ball_purple', 'ball_red']
 
 while True:

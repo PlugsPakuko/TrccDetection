@@ -1,52 +1,47 @@
 from ultralytics import YOLO
 import cv2
-import math 
+import keyboard
+
+BallBlue = 1
+BallPurple = 2
+BallRed = 3
 
 cap = cv2.VideoCapture(0)
 model = YOLO("best.pt")
 classNames = ['Silo', 'ball_blue', 'ball_purple', 'ball_red']
 
-while True:
+def get_ball(target_ball):
+    nearest_target = (None, None)
+    min_d = float('inf')
+
     success, img = cap.read()
     results = model(img, verbose=False, stream=True)
 
     for r in results:
-        boxes = r.boxes
+        box = r.boxes
 
-        for box in boxes:
-            # bounding box
+        if box and classNames[int(box.cls[0])] == classNames[target_ball]:
             x1, y1, x2, y2 = box.xyxy[0]
-            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+            centroid_x = ( float(x1) + float(x2) ) / 2
+            centroid_y = ( float(y1) + float(y2) ) / 2
 
-            # calculate center coordinates
-            center_x = int((x1 + x2) / 2)
-            center_y = int((y1 + y2) / 2)
+            d = float(x2) - float(x1)
+            if d < min_d:
+                min_d = d
+                nearest_target = (centroid_x, centroid_y)
+    
+    if nearest_target is not None:
+        print("Nearest x:{} y:{}".format(nearest_target[0], nearest_target[1]))
+    else:
+        print("Ball not found")
 
-            # put box in cam
-            cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
+    return nearest_target
 
-            # confidence
-            confidence = math.ceil((box.conf[0] * 100)) / 100
-            print("Confidence --->", confidence)
-
-            # class name
-            cls = int(box.cls[0])
-            print("Class name -->", classNames[cls])
-
-            # coordinate
-            print("Center: ({}, {})".format(center_x, center_y))
-
-            # object details
-            org = [x1, y1]
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            fontScale = 1
-            color = (255, 0, 0)
-            thickness = 2
-            cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
-
-
-    cv2.imshow('Webcam', img)
-    if cv2.waitKey(1) == ord('q'):
+while True:
+    print("Waiting...")
+    if keyboard.read_key() == 'p':
+        coordinate = get_ball(BallBlue)
+    else:
         break
 
 cap.release()

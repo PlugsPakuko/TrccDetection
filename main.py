@@ -38,6 +38,34 @@ def get_ball(TargetBall):
 
     return nearest_target
 
+def CountBallSilo(TargetBall):
+    # (Silo Existed, Top, Mid, Bottom)
+    Stack = (0 ,-1, -1, -1)
+
+    success, img = cap.read()
+    results = model(img, verbose=False, stream=True)
+
+    for r in results:
+        box = r.boxes
+
+        if box and classNames[int(box.cls[0])] == classNames[Silo] :
+            Stack[0] = 1
+        elif box and classNames[int(box.cls[0])] == classNames[TargetBall]:
+            x1, y1, x2, y2 = box.xyxy[0]
+            Stack[(y2 // 160) + 1] = 1
+        else:
+            x1, y1, x2, y2 = box.xyxy[0]
+            Stack[(y2 // 160) + 1] = 0
+            
+    
+    if Stack[0]:
+        print("Silo Detected!")
+        #strategy
+    else:
+        print("Silo not found") 
+        return -1
+
+
 while True:
     print("Waiting...")
     if keyboard.read_key() == 'p': 

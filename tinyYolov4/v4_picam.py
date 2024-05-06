@@ -1,3 +1,4 @@
+from picamera2 import Picamera2
 import cv2 as cv
 import time
 
@@ -20,21 +21,24 @@ model = cv.dnn_DetectionModel(net)
 model.setInputParams(size=(416, 416), scale=1/255, swapRB = True)
 
 
-cap = cv.VideoCapture(0)
+cap = Picamera2()
+cap.start()
 
 while True:
-    ret, frame = cap.read()
+    frame = cap.capture_array("main")
+    rgb_img = cv.cvtColor(frame, cv.COLOR_RGB2BGR)
 
-    classes, scores, boxes = model.detect(frame, Conf_threshold, NMS_threshold)
+    classes, scores, boxes = model.detect(rgb_img, Conf_threshold, NMS_threshold)
 
     for (classid, score, box) in zip(classes, scores, boxes):
         color = COLORS[int(classid) % len(COLORS)]
         label = "%s : %f" % (class_name[classid], score)
-        cv.rectangle(frame, box, color, 1)
-        cv.putText(frame, label, (box[0], box[1]-10),
+        print(label)
+        cv.rectangle(rgb_img, box, color, 1)
+        cv.putText(rgb_img, label, (box[0], box[1]-10),
                    cv.FONT_HERSHEY_COMPLEX, 0.3, color, 1)
 
-    cv.imshow('frame', frame)
+    cv.imshow('frame', rgb_img)
     key = cv.waitKey(1)
     if key == ord('q'):
         break

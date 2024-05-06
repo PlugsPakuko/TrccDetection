@@ -1,4 +1,0 @@
-BlueBall
-PurpleBall
-RedBall
-Silo

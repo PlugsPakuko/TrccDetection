@@ -1,20 +1,18 @@
 import cv2 as cv
 import time
 
+#adjust threshold here
 Conf_threshold = 0.8
 NMS_threshold = 0.4
 
 COLORS = [(0, 255, 0), (0, 0, 255), (255, 0, 0),
           (255, 255, 0), (255, 0, 255), (0, 255, 255)]
 
-class_name = ['BlueBall',
-'PurpleBall',
-'RedBall',
-'Silo']
+class_name = ['BlueBall', 'PurpleBall', 'RedBall', 'Silo']
 
 net = cv.dnn.readNet('custom-yolov4-tiny-detector_last.weights', 'custom-yolov4-tiny-detector.cfg')
-net.setPreferableBackend(cv.dnn.DNN_BACKEND_CUDA)
-net.setPreferableTarget(cv.dnn.DNN_TARGET_CUDA_FP16)
+# net.setPreferableBackend(cv.dnn.DNN_BACKEND_CUDA)
+# net.setPreferableTarget(cv.dnn.DNN_TARGET_CUDA_FP16)
 
 model = cv.dnn_DetectionModel(net)
 model.setInputParams(size=(416, 416), scale=1/255, swapRB = True)
@@ -26,6 +24,9 @@ while True:
     ret, frame = cap.read()
 
     classes, scores, boxes = model.detect(frame, Conf_threshold, NMS_threshold)
+    #boxes = [x, y, width, height]
+    #classes = classID
+    #scores = confidence
 
     for (classid, score, box) in zip(classes, scores, boxes):
         color = COLORS[int(classid) % len(COLORS)]

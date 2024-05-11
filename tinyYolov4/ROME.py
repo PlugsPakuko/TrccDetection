@@ -6,15 +6,14 @@ from picamera2 import Picamera2
 
 
 #serial comms teensy
-ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
 ser.reset_input_buffer()
 
 #TCP 2ndPi
-SERVER_IP = '0.0.0.0'
-SERVER_PORT = 12345
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((SERVER_IP, SERVER_PORT))
+server_socket.bind(('0.0.0.0', 12345))  # Bind to all network interfaces
 server_socket.listen(1)
+pi2, pi2_adr = server_socket.accept()
 
 #adjust threshold here
 Conf_threshold = 0.8
@@ -143,9 +142,9 @@ if __name__ == '__main__':
         elif(len(command) == 2 and command[0] == '2'): #CheckSilo
             ret = 0
             forward_msg = str(command[0]) + ',' + str(command[1]) + '\n'
-            server_socket.sendall(forward_msg.encode())
+            pi2.sendall(forward_msg.encode())
             while(ret == 0):
-                data = server_socket.recv(1024).decode()
+                data = pi2.recv(1024).decode()
                 if(data == '0' or data == '1'):
                     PlaceSilo(data)
                     command = [None, None]

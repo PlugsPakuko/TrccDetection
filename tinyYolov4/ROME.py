@@ -10,10 +10,10 @@ ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
 ser.reset_input_buffer()
 
 #TCP 2ndPi
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind(('0.0.0.0', 12345))  # Bind to all network interfaces
-server_socket.listen(1)
-pi2, pi2_adr = server_socket.accept()
+HOST = '192.168.41.100'
+PORT = 55555
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind((HOST, PORT))
 
 #adjust threshold here
 Conf_threshold = 0.8
@@ -142,9 +142,9 @@ if __name__ == '__main__':
         elif(len(command) == 2 and command[0] == '2'): #CheckSilo
             ret = 0
             forward_msg = str(command[0]) + ',' + str(command[1]) + '\n'
-            pi2.sendall(forward_msg.encode())
+            s.sendall(forward_msg.encode())
             while(ret == 0):
-                data = pi2.recv(1024).decode()
+                data = s.recv(1024).decode()
                 if(data == '0' or data == '1'):
                     PlaceSilo(data)
                     command = [None, None]

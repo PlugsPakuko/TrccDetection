@@ -6,8 +6,11 @@ from picamera2 import Picamera2
 
 
 #TCP MainPi
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client_socket.connect(('ip_address_of_pi1', 12345))  # Replace 'ip_address_of_pi1' with the IP address of Pi1
+HOST = '192.168.41.100'
+PORT = 55555
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((HOST, PORT))
+
 
 #adjust threshold here
 Conf_threshold = 0.8
@@ -97,7 +100,7 @@ def PlaceSiloStrategy(Stack, TargetBall):
 
 def PlaceSilo(Strat):
     data = str(Strat) + "\n"
-    client_socket.sendall(data.encode())
+    s.sendall(data.encode())
 
 if __name__ == '__main__':
     cap.start()
@@ -107,7 +110,7 @@ if __name__ == '__main__':
     command = [None, None]
     while(1):
         ret = 0
-        line =  client_socket.recv(1024).decode().rstrip()
+        line =  s.recv(1024).decode()
         command = line.split(',') #split with whiteSpcae
         print('wating for cmd')
         if(len(command) == 2 and command[0] == '2'): #CheckSilo
